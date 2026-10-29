@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: #f4f6f9;
+    --foreground: #0b1528;
+    --card: #ffffff;
+    --card-foreground: #0b1528;
+    --popover: #ffffff;
+    --popover-foreground: #0b1528;
+    --primary: #1d4ed8;
+    --primary-foreground: #ffffff;
+    --secondary: #e5ebf2;
+    --secondary-foreground: #1e293b;
+    --muted: #e8eef5;
+    --muted-foreground: #52637a;
+    --accent: #dbeafe;
+    --accent-foreground: #1e3a8a;
+    --destructive: #dc2626;
+    --destructive-foreground: #ffffff;
+    --border: #d7e0ea;
+    --input: #d7e0ea;
+    --ring: #1d4ed8;
+    --radius: 0.75rem;
+
+    /* Marigold / Gold highlight: used ONLY for achievements & protein */
+    --gold: #f59e0b;
+    --gold-hover: #d97706;
+    --gold-subtle: #fef3c7;
+    --gold-foreground: #78350f;
+  }
+
+  .dark {
+    --background: #090e1a;
+    --foreground: #f1f5f9;
+    --card: #111a2e;
+    --card-foreground: #f1f5f9;
+    --popover: #111a2e;
+    --popover-foreground: #f1f5f9;
+    --primary: #3b82f6;
+    --primary-foreground: #ffffff;
+    --secondary: #1a253c;
+    --secondary-foreground: #cbd5e1;
+    --muted: #162035;
+    --muted-foreground: #8899b0;
+    --accent: #1e2e4a;
+    --accent-foreground: #bfdbfe;
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+    --border: #22324f;
+    --input: #22324f;
+    --ring: #3b82f6;
+
+    /* Dark mode Marigold / Gold highlight */
+    --gold: #fbbf24;
+    --gold-hover: #f59e0b;
+    --gold-subtle: #362207;
+    --gold-foreground: #fef3c7;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-gold: var(--gold);
+  --color-gold-hover: var(--gold-hover);
+  --color-gold-subtle: var(--gold-subtle);
+  --color-gold-foreground: var(--gold-foreground);
+  --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Tabular numerals for gym metrics and progress numbers */
+.tabular-nums,
+[data-tabular-nums] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Ensure minimum touch target size of 44px on interactive controls */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

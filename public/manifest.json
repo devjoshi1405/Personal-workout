@@ -1,0 +1,25 @@
+{
+  "name": "Bench & Dal - Indian Home Dumbbell Coach",
+  "short_name": "Bench & Dal",
+  "description": "Personal coach for Indian vegetarian lifters with one flat bench and dumbbells only.",
+  "start_url": "/today",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1329",
+  "theme_color": "#0284c7",
+  "categories": ["fitness", "health", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

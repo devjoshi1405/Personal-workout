@@ -98,7 +98,10 @@ export async function loadUserProfile(): Promise<FullUserData> {
         profile = null;
       }
     }
-    const savedWeights = localStorage.getItem(LOCAL_WEIGHTS_KEY);
+    let savedWeights = localStorage.getItem(LOCAL_WEIGHTS_KEY);
+    if (!savedWeights) {
+      savedWeights = localStorage.getItem("bench_and_dal_weights");
+    }
     if (savedWeights) {
       try {
         weightEntries = JSON.parse(savedWeights);
@@ -206,16 +209,19 @@ export async function saveUserProfile(
     // Always mirror to local storage
     if (typeof window !== "undefined") {
       localStorage.setItem(LOCAL_PROFILE_KEY, JSON.stringify(fullProfile));
-      const existingWeightsStr = localStorage.getItem(LOCAL_WEIGHTS_KEY);
+      const existingWeightsStr = localStorage.getItem(LOCAL_WEIGHTS_KEY) || localStorage.getItem("bench_and_dal_weights");
       const list: WeightEntry[] = existingWeightsStr ? JSON.parse(existingWeightsStr) : [];
-      list.push({
+      const filtered = list.filter((w) => w.date !== todayStr);
+      filtered.push({
         id: `w_${Date.now()}`,
         user_id: userId,
         date: todayStr,
         weight_kg: initialWeightKg,
         created_at: new Date().toISOString(),
       });
-      localStorage.setItem(LOCAL_WEIGHTS_KEY, JSON.stringify(list));
+      filtered.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      localStorage.setItem(LOCAL_WEIGHTS_KEY, JSON.stringify(filtered));
+      localStorage.setItem("bench_and_dal_weights", JSON.stringify(filtered));
     }
   } catch (err) {
     console.error("Error saving profile:", err);

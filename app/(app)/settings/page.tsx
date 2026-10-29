@@ -38,6 +38,7 @@ export default function SettingsPage() {
   const [name, setName] = React.useState("");
   const [age, setAge] = React.useState<number | string>(26);
   const [heightCm, setHeightCm] = React.useState<number | string>(175);
+  const [currentWeightKg, setCurrentWeightKg] = React.useState<number | string>(78);
   const [goalWeightKg, setGoalWeightKg] = React.useState<number | string>(72);
   const [targetDate, setTargetDate] = React.useState("");
   const [diet, setDiet] = React.useState<"veg" | "egg">("veg");
@@ -58,6 +59,10 @@ export default function SettingsPage() {
         setDumbbellStep(res.profile.dumbbell_step_kg ?? 2.0);
         setActivityFactor(res.profile.activity_factor ? res.profile.activity_factor.toString() : "1.375");
       }
+      const latestWeight = res.weightEntries && res.weightEntries.length > 0
+        ? res.weightEntries[res.weightEntries.length - 1].weight_kg
+        : (res.profile?.goal_weight_kg ? res.profile.goal_weight_kg + 6 : 78);
+      setCurrentWeightKg(latestWeight);
       setLoading(false);
     });
   }, []);
@@ -68,13 +73,10 @@ export default function SettingsPage() {
     setSaveSuccess(false);
 
     try {
+      const parsedCurrentWeight = parseFloat(String(currentWeightKg)) || 78;
       const parsedGoalWeight = parseFloat(String(goalWeightKg)) || 72;
       const parsedAge = parseInt(String(age), 10) || 26;
       const parsedHeight = parseInt(String(heightCm), 10) || 175;
-
-      const currentWeight = userData?.weightEntries?.length
-        ? userData.weightEntries[userData.weightEntries.length - 1].weight_kg
-        : parsedGoalWeight + 5;
 
       await saveUserProfile(
         {
@@ -93,8 +95,11 @@ export default function SettingsPage() {
           theme: "system",
           timezone: "Asia/Kolkata",
         },
-        currentWeight
+        parsedCurrentWeight
       );
+
+      const refreshed = await loadUserProfile();
+      setUserData(refreshed);
 
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
@@ -280,34 +285,55 @@ export default function SettingsPage() {
               </div>
             </div>
 
+            {/* Current Weight and Target Weight */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <label htmlFor="settings-goal-weight" className="text-xs font-bold uppercase tracking-wide">
-                  Target Weight (kg)
-                </label>
-                <Input
-                  id="settings-goal-weight"
-                  type="number"
-                  step="0.1"
-                  value={goalWeightKg}
-                  onChange={(e) => setGoalWeightKg(e.target.value)}
-                  className="min-h-[44px]"
-                  required
-                />
+                  <label htmlFor="settings-current-weight" className="text-xs font-bold uppercase tracking-wide">
+                    Current Weight (kg)
+                  </label>
+                  <Input
+                    id="settings-current-weight"
+                    type="number"
+                    step="0.1"
+                    min="30"
+                    max="250"
+                    value={currentWeightKg}
+                    onChange={(e) => setCurrentWeightKg(e.target.value)}
+                    className="min-h-[44px]"
+                    required
+                  />
               </div>
               <div className="space-y-1.5">
-                <label htmlFor="settings-target-date" className="text-xs font-bold uppercase tracking-wide">
-                  Target Date
-                </label>
-                <Input
-                  id="settings-target-date"
-                  type="date"
-                  value={targetDate}
-                  onChange={(e) => setTargetDate(e.target.value)}
-                  className="min-h-[44px]"
-                  required
-                />
+                  <label htmlFor="settings-goal-weight" className="text-xs font-bold uppercase tracking-wide">
+                    Target Weight (kg)
+                  </label>
+                  <Input
+                    id="settings-goal-weight"
+                    type="number"
+                    step="0.1"
+                    min="30"
+                    max="250"
+                    value={goalWeightKg}
+                    onChange={(e) => setGoalWeightKg(e.target.value)}
+                    className="min-h-[44px]"
+                    required
+                  />
               </div>
+            </div>
+
+            {/* Target Date */}
+            <div className="space-y-1.5">
+              <label htmlFor="settings-target-date" className="text-xs font-bold uppercase tracking-wide">
+                Target Date
+              </label>
+              <Input
+                id="settings-target-date"
+                type="date"
+                value={targetDate}
+                onChange={(e) => setTargetDate(e.target.value)}
+                className="min-h-[44px]"
+                required
+              />
             </div>
 
             {/* Diet & Dumbbell Jump Step */}
@@ -388,7 +414,7 @@ export default function SettingsPage() {
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ action: "subscribe", subscription: { endpoint: "local" } }),
                       });
-                    } catch {}
+                    } catch { }
                   } else {
                     alert("Notification permission denied or dismissed.");
                   }

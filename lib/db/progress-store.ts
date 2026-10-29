@@ -104,6 +104,7 @@ export async function logWeightEntry(weightKg: number, dateStr?: string): Promis
         (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
       );
       localStorage.setItem(STORAGE_KEYS.WEIGHTS, JSON.stringify(updated));
+      localStorage.setItem("bench_and_dal_weight_entries", JSON.stringify(updated));
     } catch {}
   }
 

@@ -60,13 +60,14 @@ export default function ProgressPage() {
 
     // Load initial profile data from storage if available
     try {
-      const savedProfile = localStorage.getItem("bench_and_dal_profile");
+      const savedProfile = localStorage.getItem("bench_and_dal_user_profile") || localStorage.getItem("bench_and_dal_profile");
       if (savedProfile) {
         const p = JSON.parse(savedProfile);
-        if (p.target_weight_kg) setTargetWeight(p.target_weight_kg);
+        const targetW = p.goal_weight_kg || p.target_weight_kg;
+        if (targetW) setTargetWeight(targetW);
         if (p.daily_calories) setBaseCalories(p.daily_calories);
       }
-    } catch {}
+    } catch { }
 
     loadData();
   }, []);
@@ -233,10 +234,10 @@ export default function ProgressPage() {
               {coachProposal?.shouldAdjust
                 ? `Proposal: Adjust target by ${coachProposal.proposedDeltaKcal > 0 ? "+" : ""}${coachProposal.proposedDeltaKcal} kcal/day`
                 : coachProposal?.isPlateauWarning
-                ? "Plateau Detected: Holding Calorie Baseline Steady"
-                : coachProposal?.cooldownActive
-                ? "10-Day Adjustment Cooldown Active"
-                : "Pace on Track • Holding Steady"}
+                  ? "Plateau Detected: Holding Calorie Baseline Steady"
+                  : coachProposal?.cooldownActive
+                    ? "10-Day Adjustment Cooldown Active"
+                    : "Pace on Track • Holding Steady"}
             </span>
           </CardTitle>
 
@@ -282,11 +283,10 @@ export default function ProgressPage() {
                 <button
                   key={r}
                   onClick={() => setRange(r)}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                    range === r
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${range === r
                       ? "bg-card text-foreground shadow-xs border border-border"
                       : "text-muted-foreground hover:text-foreground"
-                  }`}
+                    }`}
                 >
                   {r}
                 </button>

@@ -26,6 +26,7 @@ import {
   FULL_BODY_MOBILITY_REST_DAY,
 } from "@/lib/db/workout-store";
 import { ExerciseCard, LoggedSet } from "@/components/workout/exercise-card";
+import { SevenDayPlanner } from "@/components/workout/seven-day-planner";
 import { RestTimer } from "@/components/workout/rest-timer";
 import { InjuryModal } from "@/components/workout/injury-modal";
 import { Button } from "@/components/ui/button";
@@ -35,9 +36,20 @@ import { Badge } from "@/components/ui/badge";
 type ActiveTab = TemplateKey | "REST";
 
 export default function WorkoutPage() {
+  const [programMode, setProgramMode] = React.useState<"7day" | "4day">("7day");
   const [activeTab, setActiveTab] = React.useState<ActiveTab>("UA");
   const [templateData, setTemplateData] = React.useState<FullTemplateData | null>(null);
   const [loading, setLoading] = React.useState(true);
+
+  // Check URL params on mount
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("template") || params.get("program") === "4day") {
+        setProgramMode("4day");
+      }
+    }
+  }, []);
 
   // Per-exercise set state: exercise_id -> LoggedSet[]
   const [exerciseSets, setExerciseSets] = React.useState<Record<string, LoggedSet[]>>({});
@@ -156,44 +168,74 @@ export default function WorkoutPage() {
 
   return (
     <div className="space-y-6 pb-20">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground flex items-center gap-2">
-            <span>Workout Tracker</span>
-            <span className="w-2 h-2 rounded-full bg-gold" />
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Dumbbells &amp; flat bench progressive overload engine
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowInjuryModal(true)}
-            className="min-h-[44px] font-semibold text-xs flex items-center gap-1.5"
-          >
-            <ShieldCheck className="w-4 h-4 text-amber-500" />
-            <span>Injury Swaps</span>
-            {activeInjuries.length > 0 && (
-              <Badge variant="gold" className="text-[10px] h-4 px-1.5">
-                {activeInjuries.length}
-              </Badge>
-            )}
-          </Button>
-
-          <Link href="/workout/history">
-            <Button variant="outline" size="sm" className="min-h-[44px] font-semibold text-xs flex items-center gap-1.5">
-              <History className="w-4 h-4" />
-              <span>History</span>
-            </Button>
-          </Link>
-        </div>
+      {/* Program Mode Selector Switcher */}
+      <div className="flex items-center gap-1.5 p-1 bg-muted/60 rounded-2xl border border-border w-fit text-xs font-bold">
+        <button
+          type="button"
+          onClick={() => setProgramMode("7day")}
+          className={`px-3.5 py-2 rounded-xl transition-all ${
+            programMode === "7day"
+              ? "bg-card text-foreground shadow-xs border border-border"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          7-Day Paired Split (Recommended)
+        </button>
+        <button
+          type="button"
+          onClick={() => setProgramMode("4day")}
+          className={`px-3.5 py-2 rounded-xl transition-all ${
+            programMode === "4day"
+              ? "bg-card text-foreground shadow-xs border border-border"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          4-Day Classic Split
+        </button>
       </div>
 
-      {/* Split Tabs (Upper A, Lower A, Upper B, Lower B, Rest Day) */}
+      {programMode === "7day" ? (
+        <SevenDayPlanner />
+      ) : (
+        <>
+          {/* Top Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground flex items-center gap-2">
+                <span>4-Day Classic Workout Tracker</span>
+                <span className="w-2 h-2 rounded-full bg-gold" />
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Upper/Lower 4-day progressive overload engine
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowInjuryModal(true)}
+                className="min-h-[44px] font-semibold text-xs flex items-center gap-1.5"
+              >
+                <ShieldCheck className="w-4 h-4 text-amber-500" />
+                <span>Injury Swaps</span>
+                {activeInjuries.length > 0 && (
+                  <Badge variant="gold" className="text-[10px] h-4 px-1.5">
+                    {activeInjuries.length}
+                  </Badge>
+                )}
+              </Button>
+
+              <Link href="/workout/history">
+                <Button variant="outline" size="sm" className="min-h-[44px] font-semibold text-xs flex items-center gap-1.5">
+                  <History className="w-4 h-4" />
+                  <span>History</span>
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          {/* Split Tabs (Upper A, Lower A, Upper B, Lower B, Rest Day) */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 select-none scrollbar-none">
         {[
           { key: "UA" as const, label: "Upper A", subtitle: "Mon" },
@@ -374,21 +416,23 @@ export default function WorkoutPage() {
         </div>
       )}
 
-      {/* Floating Rest Timer */}
-      {activeRestSeconds !== null && (
-        <RestTimer
-          initialSeconds={activeRestSeconds}
-          onDismiss={() => setActiveRestSeconds(null)}
-        />
-      )}
+          {/* Floating Rest Timer */}
+          {activeRestSeconds !== null && (
+            <RestTimer
+              initialSeconds={activeRestSeconds}
+              onDismiss={() => setActiveRestSeconds(null)}
+            />
+          )}
 
-      {/* Injury Modal */}
-      {showInjuryModal && (
-        <InjuryModal
-          activeInjuries={activeInjuries}
-          onToggleInjury={handleToggleInjury}
-          onClose={() => setShowInjuryModal(false)}
-        />
+          {/* Injury Modal */}
+          {showInjuryModal && (
+            <InjuryModal
+              activeInjuries={activeInjuries}
+              onToggleInjury={handleToggleInjury}
+              onClose={() => setShowInjuryModal(false)}
+            />
+          )}
+        </>
       )}
     </div>
   );

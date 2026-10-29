@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { loadUserProfile, updateWaterGlasses, FullUserData } from "@/lib/db/profile-store";
+import { logWeightEntry } from "@/lib/db/progress-store";
 
 const DAILY_TIPS = [
   "Strength improves in 2-4 weeks through motor unit recruitment. Visible muscle shape changes take 6-8 weeks of consistent progressive overload.",
@@ -44,19 +45,24 @@ export default function TodayPage() {
   const [currentDateStr, setCurrentDateStr] = React.useState("");
   const [dayOfWeek, setDayOfWeek] = React.useState(1); // default to Mon
 
-  // Determine split for today
+  // Determine 7-day plan split for today
   const todayWorkout = React.useMemo(() => {
     switch (dayOfWeek) {
       case 1:
-        return { key: "UA", name: "Upper Body A", exercises: 6, isRest: false, desc: "Bench press, rows, shoulder press, flies, curls & triceps" };
+        return { key: "mon", name: "Monday — Chest + Triceps", exercises: 5, isRest: false, desc: "Dumbbell bench press, floor press, chest fly, overhead triceps & kickbacks" };
       case 2:
-        return { key: "LA", name: "Lower Body A", exercises: 6, isRest: false, desc: "Goblet squats, RDLs, Bulgarian split squats, hip thrusts, calves, plank" };
+        return { key: "tue", name: "Tuesday — Back + Biceps", exercises: 5, isRest: false, desc: "One-arm dumbbell rows, chest-supported rows, reverse fly, curls & hammer curls" };
+      case 3:
+        return { key: "wed", name: "Wednesday — Cardio + Core", exercises: 4, isRest: false, desc: "Comfortable walking (15–25m), dead bugs, standing knee raises & gentle mobility" };
       case 4:
-        return { key: "UB", name: "Upper Body B", exercises: 7, isRest: false, desc: "Neutral press, chest-supported rows, Arnold press, lateral raises, rear delts" };
+        return { key: "thu", name: "Thursday — Legs + Glutes", exercises: 5, isRest: false, desc: "Sit-to-stand from bench, dumbbell RDLs, glute bridges, calf raises & goblet squats" };
       case 5:
-        return { key: "LB", name: "Lower Body B", exercises: 7, isRest: false, desc: "Step-ups, sumo squats, single-leg RDLs, lunges, glute bridges, calves" };
+        return { key: "fri", name: "Friday — Shoulders + Abs", exercises: 5, isRest: false, desc: "Seated shoulder press, lateral raises, rear-delt fly, dumbbell shrugs & dead bugs" };
+      case 6:
+        return { key: "sat", name: "Saturday — Light Full Body + Cardio", exercises: 5, isRest: false, desc: "Sit-to-stand, wall push-ups, light rows, glute bridges & comfortable walk" };
+      case 0:
       default:
-        return { key: "REST", name: "Active Recovery & Mobility", exercises: 0, isRest: true, desc: "10-minute full body stretch routine & planned daily walk" };
+        return { key: "sun", name: "Sunday — Rest and Recovery", exercises: 0, isRest: true, desc: "Restoration day: deep sleep, hydration, vegetarian nutrition & weekly debrief" };
     }
   }, [dayOfWeek]);
 
@@ -86,9 +92,12 @@ export default function TodayPage() {
     setWaterCount(updated);
   };
 
-  const handleQuickWeighIn = () => {
+  const handleQuickWeighIn = async () => {
     const val = parseFloat(weighInInput);
     if (!isNaN(val) && val >= 30 && val <= 250) {
+      await logWeightEntry(val);
+      const updated = await loadUserProfile();
+      setData(updated);
       setWeighInSaved(true);
     }
   };
